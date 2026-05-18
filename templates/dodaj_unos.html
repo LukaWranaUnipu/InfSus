@@ -1,0 +1,246 @@
+{% extends "base.html" %} {% block content %}
+
+<h2 class="mb-4">Dnevni unos</h2>
+
+{% if plan %}
+
+<div class="card shadow border-0 mb-4">
+  <div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-1">{{ plan.naziv }}</h4>
+
+        <small class="text-muted"> Aktivni plan </small>
+      </div>
+
+      <button
+        class="btn btn-success"
+        type="button"
+        onclick="toggleForm()"
+        id="toggleButton"
+      >
+        + Dodaj unos
+      </button>
+    </div>
+    <div id="entryForm" style="display: none">
+      <hr class="my-4" />
+      <form method="POST" onsubmit="hideFormAfterSubmit()">
+        <h5 class="mb-3">Prehrana</h5>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label"> Kalorije </label>
+
+            <div class="input-group">
+              <input
+                type="number"
+                name="kalorije"
+                class="form-control"
+                required
+              />
+              <span class="input-group-text"> / {{ plan.kalorije }} kcal </span>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label"> Proteini </label>
+
+            <div class="input-group">
+              <input
+                type="number"
+                name="proteini"
+                class="form-control"
+                required
+              />
+              <span class="input-group-text"> / {{ plan.proteini }} g </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label"> Masti </label>
+            <div class="input-group">
+              <input type="number" name="masti" class="form-control" required />
+              <span class="input-group-text"> / {{ plan.masti }} g </span>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label"> Ugljikohidrati </label>
+            <div class="input-group">
+              <input type="number" name="uh" class="form-control" required />
+              <span class="input-group-text">
+                / {{ plan.ugljikohidrati }} g
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h5 class="mb-3">Trening</h5>
+
+        <div class="form-check form-switch mb-4">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="vjezbaCheckbox"
+            name="vjezba"
+            onchange="toggleWorkoutFields()"
+          />
+          <label class="form-check-label" for="vjezbaCheckbox">
+            Obavio vježbu
+          </label>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label"> Trajanje vježbe </label>
+            <div class="input-group">
+              <input
+                type="number"
+                name="trajanje"
+                id="trajanjeInput"
+                class="form-control"
+                disabled
+              />
+              <span class="input-group-text"> / {{ plan.trajanje }} min </span>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label"> Težina </label>
+            <div class="input-group">
+              <input
+                type="number"
+                step="0.1"
+                name="tezina"
+                class="form-control"
+                required
+              />
+              <span class="input-group-text"> kg </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label"> Opis vježbe </label>
+
+          <textarea
+            name="opis"
+            id="opisInput"
+            class="form-control"
+            rows="3"
+            disabled
+          ></textarea>
+        </div>
+
+        <button class="btn btn-success w-100 py-2">Spremi dnevni unos</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<div class="alert alert-warning shadow-sm">
+  <h5>Nema aktivnog plana</h5>
+  <p class="mb-3">Prvo izradite ili aktivirajte plan.</p>
+  <a href="/planovi" class="btn btn-primary"> Idi na planove </a>
+</div>
+
+{% endif %}
+
+<h4 class="mt-5 mb-3">Povijest unosa</h4>
+
+<div class="card shadow border-0 mb-5">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Datum</th>
+          <th>Plan</th>
+          <th>Kalorije</th>
+          <th>Proteini</th>
+          <th>Težina</th>
+          <th>Trening</th>
+          <th>Trajanje</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for e in entries %}
+
+        <tr>
+          <td>{{ e.datum }}</td>
+
+          <td>{{ e.plan.naziv }}</td>
+
+          <td>{{ e.kalorije }} kcal</td>
+
+          <td>{{ e.proteini }} g</td>
+
+          <td>{{ e.tezina }} kg</td>
+
+          <td>
+            {% if e.vjezba_obavljena %}
+
+            <span class="badge bg-success"> Da </span>
+
+            {% else %}
+
+            <span class="badge bg-secondary"> Ne </span>
+
+            {% endif %}
+          </td>
+
+          <td>
+            {% if e.vjezba_obavljena %} {{ e.trajanje_vjezbe }} min {% else %} -
+            {% endif %}
+          </td>
+        </tr>
+
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function toggleWorkoutFields() {
+    const checked = document.getElementById("vjezbaCheckbox").checked;
+
+    document.getElementById("trajanjeInput").disabled = !checked;
+
+    document.getElementById("opisInput").disabled = !checked;
+  }
+
+  function toggleForm() {
+    const form = document.getElementById("entryForm");
+
+    const button = document.getElementById("toggleButton");
+
+    if (form.style.display === "none") {
+      form.style.display = "block";
+
+      button.innerHTML = "Zatvori";
+
+      button.classList.remove("btn-success");
+
+      button.classList.add("btn-outline-secondary");
+    } else {
+      form.style.display = "none";
+
+      button.innerHTML = "+ Dodaj unos";
+
+      button.classList.remove("btn-outline-secondary");
+
+      button.classList.add("btn-success");
+    }
+  }
+
+  function hideFormAfterSubmit() {
+    document.getElementById("entryForm").style.display = "none";
+  }
+</script>
+
+{% endblock %}

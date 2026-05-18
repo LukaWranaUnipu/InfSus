@@ -1,30 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<body class="container mt-5">
+  <head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
-<h2>Novi plan</h2>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <div class="card shadow p-4">
+        <h2 class="mb-4 text-center">Novi plan</h2>
 
-<form method="POST">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label">Naziv plana</label>
+            <input type="text" name="naziv" class="form-control" required />
+          </div>
 
-<input name="naziv" placeholder="Naziv" class="form-control mb-2">
+          <div class="mb-3">
+            <label class="form-label">Broj vježbi</label>
+            <input
+              type="number"
+              name="broj"
+              class="form-control"
+              min="1"
+              required
+            />
+          </div>
 
-<input name="broj" placeholder="Broj vježbi" class="form-control mb-2">
+          <div class="mb-3">
+            <label class="form-label">Opis vježbi</label>
+            <textarea name="opis" class="form-control" rows="3"></textarea>
+          </div>
 
-<input name="opis" placeholder="Opis vježbi" class="form-control mb-2">
+          <div class="mb-3">
+            <label class="form-label">Trajanje (min)</label>
+            <input type="number" name="trajanje" class="form-control" min="0" />
+          </div>
 
-<input name="trajanje" placeholder="Trajanje" class="form-control mb-2">
+          <hr />
 
-<input name="kalorije" placeholder="Kalorije" class="form-control mb-2">
+          <h5>Prehrana</h5>
 
-<input name="proteini" placeholder="Proteini" class="form-control mb-2">
+          <div class="row">
+            <div class="col">
+              <label>Kalorije</label>
+              <input
+                type="number"
+                name="kalorije"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="col">
+              <label>Proteini (g)</label>
+              <input
+                type="number"
+                name="proteini"
+                class="form-control"
+                required
+              />
+            </div>
+          </div>
 
-<input name="masti" placeholder="Masti" class="form-control mb-2">
+          <div class="row mt-3">
+            <div class="col">
+              <label>Masti (g)</label>
+              <input type="number" name="masti" class="form-control" required />
+            </div>
+            <div class="col">
+              <label>Ugljikohidrati (g)</label>
+              <input type="number" name="uh" class="form-control" required />
+            </div>
+          </div>
 
-<input name="uh" placeholder="Ugljikohidrati" class="form-control mb-2">
+          <button class="btn btn-success mt-4 w-100">Spremi plan</button>
 
-<button class="btn btn-success">Spremi plan</button>
-
-</form>
-
-</body>
+          <a href="/planovi" class="btn btn-outline-secondary w-100 mt-2">
+            Izađi bez spremanja
+          </a>
+        </form>
+      </div>
+    </div>
+  </body>
 </html>

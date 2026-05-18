@@ -1,30 +1,241 @@
-<!DOCTYPE html>
-<html>
-<head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-5">
+{% extends "base.html" %} {% block content %}
 
-<h1>Fitness Planner</h1>
+<h1 class="mb-4">Fitness Planner</h1>
 
-<a href="/add-plan" class="btn btn-primary mb-3">Dodaj Plan</a>
+<!-- AKTIVNI PLAN -->
 
-<table class="table">
-<tr>
-<th>Naziv</th>
-<th>Kalorije</th>
-<th>Akcije</th>
-</tr>
+{% if aktivni_plan %}
 
-{% for p in plans %}
-<tr>
-<td>{{p.naziv}}</td>
-<td>{{p.kalorije}}</td>
-<td>Pregled</td>
-</tr>
-{% endfor %}
+<div class="card shadow border-0 mb-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-1">{{ aktivni_plan.naziv }}</h4>
 
-</table>
+        <small class="text-muted"> Aktivni plan </small>
+      </div>
 
-</body>
-</html>
+      <span class="badge bg-success fs-6"> Aktivan </span>
+    </div>
+
+    <hr />
+
+    <div class="row text-center">
+      <div class="col-md-3 col-6 mb-3">
+        <small class="text-muted"> Kalorije </small>
+
+        <div class="fs-4 fw-bold">{{ aktivni_plan.kalorije }}</div>
+      </div>
+
+      <div class="col-md-3 col-6 mb-3">
+        <small class="text-muted"> Proteini </small>
+
+        <div class="fs-4 fw-bold">{{ aktivni_plan.proteini }}g</div>
+      </div>
+
+      <div class="col-md-3 col-6 mb-3">
+        <small class="text-muted"> Vježbe / tjedan </small>
+
+        <div class="fs-4 fw-bold">{{ aktivni_plan.broj_vjezba }}</div>
+      </div>
+
+      <div class="col-md-3 col-6 mb-3">
+        <small class="text-muted"> Trajanje </small>
+
+        <div class="fs-4 fw-bold">{{ aktivni_plan.trajanje }} min</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+<!-- GLAVNE STATISTIKE -->
+
+<div class="row">
+  <div class="col-md-3 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <div class="display-5 mb-2">📅</div>
+
+        <h3>{{ total_days }}</h3>
+
+        <p class="text-muted mb-0">Ukupno dana praćenja</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <div class="display-5 mb-2">⚖️</div>
+
+        <h3>{{ latest_weight }} kg</h3>
+
+        <p class="text-muted mb-0">Trenutna težina</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <div class="display-5 mb-2">📉</div>
+
+        <h3>
+          {% if weight_change > 0 %} +{{ weight_change }} {% else %} {{
+          weight_change }} {% endif %} kg
+        </h3>
+
+        <p class="text-muted mb-0">Promjena težine</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <div class="display-5 mb-2">🏋️</div>
+
+        <h3>{{ trainings_done }}</h3>
+
+        <p class="text-muted mb-0">Odradenih treninga</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAPREDAK -->
+
+<div class="row">
+  <div class="col-md-6 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body">
+        <h5 class="mb-4">Uspješnost treninga</h5>
+
+        <div class="progress mb-3 overflow-hidden" style="height: 32px">
+          <div
+            class="progress-bar bg-success training-bar d-flex justify-content-center align-items-center"
+            data-width="{{ training_success_rate }}"
+            style="width: 0%"
+          >
+            {{ training_success_rate }}%
+          </div>
+        </div>
+
+        <p class="text-muted mb-0">
+          Trening odrađen u {{ training_success_rate }}% svih dana.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body">
+        <h5 class="mb-4">Uspješnost kalorijskog cilja</h5>
+
+        <div class="progress mb-3 overflow-hidden" style="height: 32px">
+          <div
+            class="progress-bar bg-primary calorie-bar d-flex justify-content-center align-items-center"
+            data-width="{{ calorie_goal_success }}"
+          >
+            {{ calorie_goal_success }}%
+          </div>
+        </div>
+
+        <p class="text-muted mb-0">Dana unutar kalorijskog cilja.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DODATNE STATISTIKE -->
+
+<div class="row">
+  <div class="col-md-4 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <h5 class="mb-3">Prosječne kalorije</h5>
+
+        <div class="display-6 fw-bold">{{ avg_calories }}</div>
+
+        <div class="text-muted">kcal / dan</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <h5 class="mb-3">Prosječni proteini</h5>
+
+        <div class="display-6 fw-bold">{{ avg_protein }}g</div>
+
+        <div class="text-muted">dnevno</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4 mb-4">
+    <div class="card shadow border-0 h-100">
+      <div class="card-body text-center">
+        <h5 class="mb-3">Vrijeme treninga</h5>
+
+        <div class="display-6 fw-bold">{{ total_training_minutes }}</div>
+
+        <div class="text-muted">ukupno minuta</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOTIVACIJSKI STATUS -->
+
+<div class="card shadow border-0 mb-4">
+  <div class="card-body">
+    <h5 class="mb-3">Status napretka</h5>
+
+    {% if training_success_rate >= 80 %}
+
+    <div class="alert alert-success mb-0">
+      🔥 Odlična konzistentnost! Vrlo redovito pratiš plan.
+    </div>
+
+    {% elif training_success_rate >= 50 %}
+
+    <div class="alert alert-warning mb-0">
+      ⚡ Dobar napredak, ali ima mjesta za više konzistentnosti.
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-danger mb-0">
+      📈 Pokušaj povećati broj odrađenih treninga.
+    </div>
+
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function applyProgressBars() {
+    document.querySelectorAll(".training-bar, .calorie-bar").forEach((bar) => {
+      const value = parseFloat(bar.dataset.width) || 0;
+
+      bar.style.transition = "width 0.6s ease";
+
+      if (value >= 100) {
+        bar.style.width = "100%";
+      } else {
+        bar.style.width = value + "%";
+      }
+    });
+  }
+
+  applyProgressBars();
+</script>
+
+{% endblock %}
+
+
