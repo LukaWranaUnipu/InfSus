@@ -46,57 +46,95 @@ def index():
 
     entries = list(select(e for e in Dnevnik).order_by(Dnevnik.datum))
 
-    total_days = len(entries)
+    ukupni_dani = len(entries)
 
-    avg_weight = (
-        round(sum(e.tezina for e in entries) / total_days, 2) if total_days else 0
+    prosjecna_tezina = (
+        round(sum(e.tezina for e in entries) / ukupni_dani, 2) if ukupni_dani else 0
     )
 
-    latest_weight = entries[-1].tezina if entries else 0
+    trenutna_tezina = entries[-1].tezina if entries else 0
 
-    start_weight = entries[0].tezina if entries else 0
+    pocetna_tezina = entries[0].tezina if entries else 0
 
-    weight_change = round(latest_weight - start_weight, 2) if total_days > 1 else 0
+    promijena_tezine = round(trenutna_tezina - pocetna_tezina, 2) if ukupni_dani > 1 else 0
 
-    trainings_done = sum(1 for e in entries if e.vjezba_obavljena)
+    trening_obavljen = sum(1 for e in entries if e.vjezba_obavljena)
 
-    training_success_rate = (
-        round((trainings_done / total_days) * 100, 1) if total_days else 0
+    stopa_uspjesnosti_treninga = (
+        round((trening_obavljen / ukupni_dani) * 100, 1) if ukupni_dani else 0
     )
 
-    avg_calories = (
-        round(sum(e.kalorije for e in entries) / total_days) if total_days else 0
+    prosjecne_kalorije = (
+        round(sum(e.kalorije for e in entries) / ukupni_dani) if ukupni_dani else 0
     )
 
-    avg_protein = (
-        round(sum(e.proteini for e in entries) / total_days) if total_days else 0
+    prosjecni_proteini = (
+        round(sum(e.proteini for e in entries) / ukupni_dani) if ukupni_dani else 0
     )
 
-    total_training_minutes = sum(e.trajanje_vjezbe for e in entries)
+    ukupne_minute_treninga = sum(e.trajanje_vjezbe for e in entries)
 
-    calorie_goal_success = 0
+    usjpjesnost_kalorijskog_cilja = 0
 
-    if aktivni_plan and total_days:
+    if aktivni_plan and ukupni_dani:
 
         successful_days = sum(1 for e in entries if e.kalorije <= aktivni_plan.kalorije)
 
-        calorie_goal_success = round((successful_days / total_days) * 100, 1)
+        usjpjesnost_kalorijskog_cilja = round((successful_days / ukupni_dani) * 100, 1)
+
+    zadnjih_7 = entries[-7:] if len(entries) >= 7 else []
+
+    tjedni_treninzi = sum(1 for e in zadnjih_7 if e.vjezba_obavljena)
+
+    tjedni_kalorijski_uspjeh = 0
+
+    if aktivni_plan and zadnjih_7:
+
+        uspjesni_dani = sum(
+            1 for e in zadnjih_7 if e.kalorije <= aktivni_plan.kalorije
+        )
+
+        tjedni_kalorijski_uspjeh = round(
+            (uspjesni_dani / len(zadnjih_7)) * 100
+        )
+
+    tjedni_trening_uspjeh = round(
+        (tjedni_treninzi / len(zadnjih_7)) * 100,
+        1
+    ) if zadnjih_7 else 0
+
+
+    uspjesna_dijeta = tjedni_kalorijski_uspjeh >= 70
+    uspjesni_treninzi = tjedni_trening_uspjeh >= 70
+
+    tezine = [e.tezina for e in entries]
+    datumi = [e.datum for e in entries]
+
+    kalorije_data = [e.kalorije for e in entries]
 
     
     return render_template(
         "index.html",
         aktivni_plan=aktivni_plan,
-        total_days=total_days,
-        avg_weight=avg_weight,
-        latest_weight=latest_weight,
-        start_weight=start_weight,
-        weight_change=weight_change,
-        trainings_done=trainings_done,
-        training_success_rate=training_success_rate,
-        avg_calories=avg_calories,
-        avg_protein=avg_protein,
-        total_training_minutes=total_training_minutes,
-        calorie_goal_success=calorie_goal_success,
+        ukupni_dani=ukupni_dani,
+        prosjecna_tezina=prosjecna_tezina,
+        trenutna_tezina=trenutna_tezina,
+        pocetna_tezina=pocetna_tezina,
+        promijena_tezine=promijena_tezine,
+        trening_obavljen=trening_obavljen,
+        stopa_uspjesnosti_treninga=stopa_uspjesnosti_treninga,
+        prosjecne_kalorije=prosjecne_kalorije,
+        prosjecni_proteini=prosjecni_proteini,
+        ukupne_minute_treninga=ukupne_minute_treninga,
+        usjpjesnost_kalorijskog_cilja=usjpjesnost_kalorijskog_cilja,
+        tjedni_kalorijski_uspjeh=tjedni_kalorijski_uspjeh,
+        tjedni_trening_uspjeh=tjedni_trening_uspjeh,
+        uspjesna_dijeta=uspjesna_dijeta,
+        uspjesni_treninzi=uspjesni_treninzi,
+        broj_tjednih_unosa=len(zadnjih_7),
+        tezine=tezine,
+        datumi=datumi,
+        kalorije_data=kalorije_data,
     )
 
 
