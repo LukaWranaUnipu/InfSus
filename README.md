@@ -20,8 +20,6 @@ Projekt koristi vlastiti web servis izrađen u Flask-u te SQLite bazu podataka z
 
 # Funkcionalnosti
 
-![Use case](/use-case.pdf)
-
 ## Planovi treninga
 
 - Kreiranje novih fitness planova
