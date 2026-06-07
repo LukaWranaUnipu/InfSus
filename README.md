@@ -149,3 +149,8 @@ Docker pokretanje
 docker build -t fitness-planner .
 docker run -p 5000:5000 fitness-planner
 ```
+
+
+## Link na video predstavljanje:
+
+https://youtu.be/jLAabFFcdCE
