@@ -38,6 +38,46 @@ db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
 db.generate_mapping(create_tables=True)
 
 
+def unosi_za_plan(entries, plan):
+    if not plan:
+        return []
+
+    return [e for e in entries if e.plan == plan]
+
+
+def tjedni_trening_uspjesnost(entries, plan):
+    if not plan or not entries:
+        return 0
+
+    planirani_treninzi = max(plan.broj_vjezba, 0)
+
+    if planirani_treninzi == 0:
+        return 0
+
+    tjedni = {}
+
+    for entry in entries:
+        datum = date.fromisoformat(entry.datum)
+        godina, tjedan, _ = datum.isocalendar()
+        tjedni.setdefault((godina, tjedan), 0)
+
+        if entry.vjezba_obavljena:
+            tjedni[(godina, tjedan)] += 1
+
+    uspjesni_tjedni = sum(
+        1 for broj_treninga in tjedni.values() if broj_treninga >= planirani_treninzi
+    )
+
+    return round((uspjesni_tjedni / len(tjedni)) * 100, 1)
+
+
+def trening_cilj_uspjesnost(broj_treninga, plan):
+    if not plan or plan.broj_vjezba <= 0:
+        return 0
+
+    return round(min((broj_treninga / plan.broj_vjezba) * 100, 100), 1)
+
+
 @app.route("/")
 @db_session
 def index():
@@ -45,6 +85,7 @@ def index():
     aktivni_plan = select(p for p in Plan if p.aktivno).first()
 
     entries = list(select(e for e in Dnevnik).order_by(Dnevnik.datum))
+    plan_entries = unosi_za_plan(entries, aktivni_plan)
 
     ukupni_dani = len(entries)
 
@@ -60,8 +101,9 @@ def index():
 
     trening_obavljen = sum(1 for e in entries if e.vjezba_obavljena)
 
-    stopa_uspjesnosti_treninga = (
-        round((trening_obavljen / ukupni_dani) * 100, 1) if ukupni_dani else 0
+    stopa_uspjesnosti_treninga = tjedni_trening_uspjesnost(
+        plan_entries,
+        aktivni_plan,
     )
 
     prosjecne_kalorije = (
@@ -72,17 +114,21 @@ def index():
         round(sum(e.proteini for e in entries) / ukupni_dani) if ukupni_dani else 0
     )
 
-    ukupne_minute_treninga = sum(e.trajanje_vjezbe for e in entries)
+    ukupne_minute_treninga = sum(e.trajanje_vjezbe or 0 for e in entries)
 
     usjpjesnost_kalorijskog_cilja = 0
 
-    if aktivni_plan and ukupni_dani:
+    if aktivni_plan and plan_entries:
 
-        successful_days = sum(1 for e in entries if e.kalorije <= aktivni_plan.kalorije)
+        successful_days = sum(
+            1 for e in plan_entries if e.kalorije <= aktivni_plan.kalorije
+        )
 
-        usjpjesnost_kalorijskog_cilja = round((successful_days / ukupni_dani) * 100, 1)
+        usjpjesnost_kalorijskog_cilja = round(
+            (successful_days / len(plan_entries)) * 100, 1
+        )
 
-    zadnjih_7 = entries[-7:] if len(entries) >= 7 else []
+    zadnjih_7 = plan_entries[-7:] if len(plan_entries) >= 7 else []
 
     tjedni_treninzi = sum(1 for e in zadnjih_7 if e.vjezba_obavljena)
 
@@ -98,14 +144,16 @@ def index():
             (uspjesni_dani / len(zadnjih_7)) * 100
         )
 
-    tjedni_trening_uspjeh = round(
-        (tjedni_treninzi / len(zadnjih_7)) * 100,
-        1
+    tjedni_trening_uspjeh = trening_cilj_uspjesnost(
+        tjedni_treninzi,
+        aktivni_plan,
     ) if zadnjih_7 else 0
 
 
     uspjesna_dijeta = tjedni_kalorijski_uspjeh >= 70
-    uspjesni_treninzi = tjedni_trening_uspjeh >= 70
+    uspjesni_treninzi = bool(
+        aktivni_plan and zadnjih_7 and tjedni_treninzi >= aktivni_plan.broj_vjezba
+    )
 
     tezine = [e.tezina for e in entries]
     datumi = [e.datum for e in entries]
@@ -129,6 +177,7 @@ def index():
         usjpjesnost_kalorijskog_cilja=usjpjesnost_kalorijskog_cilja,
         tjedni_kalorijski_uspjeh=tjedni_kalorijski_uspjeh,
         tjedni_trening_uspjeh=tjedni_trening_uspjeh,
+        tjedni_treninzi=tjedni_treninzi,
         uspjesna_dijeta=uspjesna_dijeta,
         uspjesni_treninzi=uspjesni_treninzi,
         broj_tjednih_unosa=len(zadnjih_7),

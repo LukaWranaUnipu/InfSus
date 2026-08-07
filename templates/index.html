@@ -106,7 +106,7 @@
           </div>
         </div>
         <p class="text-muted mb-0">
-          Trening odrađen u {{ stopa_uspjesnosti_treninga }}% svih dana.
+          Plan treninga ispunjen je u {{ stopa_uspjesnosti_treninga }}% tjedana.
         </p>
       </div>
     </div>
@@ -124,7 +124,7 @@
             {{ usjpjesnost_kalorijskog_cilja }}%
           </div>
         </div>
-        <p class="text-muted mb-0">Dana unutar kalorijskog cilja.</p>
+        <p class="text-muted mb-0">Dana unutar kalorijskog cilja aktivnog plana.</p>
       </div>
     </div>
   </div>
@@ -231,8 +231,8 @@
         <div class="alert alert-success h-100 mb-0">
           <h6>🏋️ Trening</h6>
 
-          Trening odrađen u
-          {{ tjedni_trening_uspjeh }}% dana.
+          Odrađeno je {{ tjedni_treninzi }} od planiranih
+          {{ aktivni_plan.broj_vjezba }} treninga.
 
           <hr>
 
@@ -244,8 +244,9 @@
         <div class="alert alert-warning h-100 mb-0">
           <h6>💤 Trening</h6>
 
-          Aktivnost je bila samo
-          {{ tjedni_trening_uspjeh }}% tjedna.
+          Odrađeno je {{ tjedni_treninzi }} od planiranih
+          {{ aktivni_plan.broj_vjezba }} treninga
+          ({{ tjedni_trening_uspjeh }}% cilja).
 
           <hr>
 
@@ -261,7 +262,7 @@
     {% else %}
 
     <div class="alert alert-secondary mb-0">
-      Potrebno je barem 7 dnevnih unosa za prikaz tjednog napretka.
+      Potrebno je barem 7 dnevnih unosa za aktivni plan za prikaz tjednog napretka.
     </div>
 
     {% endif %}
@@ -340,5 +341,4 @@
 </script>
 
 {% endblock %}
-
 
